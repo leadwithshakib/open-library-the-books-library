@@ -1,4 +1,4 @@
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const createBook = asyncHandler(async (req, res) => {
   // Logic to create a book
