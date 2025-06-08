@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-
-
-
+import mongoose from "mongoose";
+import { UserModel } from "./user.model.js";
+import { SendMailEnum } from "../../constants.js";
+import { sendMail } from "../../utils/mail.js";
 
 const authenticatedUserSchema = new mongoose.Schema(
   {
@@ -33,11 +33,11 @@ const authenticatedUserSchema = new mongoose.Schema(
       enum: ["ACTIVE", "INACTIVE"],
       default: "ACTIVE",
     },
-    type:{
+    type: {
       type: String,
       enum: ["EMAIL", "GOOGLE", "GITHUB", "FACEBOOK"],
       default: "EMAIL",
-    }
+    },
   },
   {
     timestamps: true,
@@ -72,6 +72,7 @@ authenticatedUserSchema.methods.generateAccessToken = function () {
 authenticatedUserSchema.methods.generateTemporaryCode = function () {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
+
 
 export const AuthenticatedUserModel = mongoose.model(
   "authenticated-users",

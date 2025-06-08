@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
-import asyncHandler from "../utils/asyncHandler.js";
-import { UserModel } from "../models/auth/user.model.js";
-
+import { AuthenticatedUserModel } from "../models/auth/authenticated-user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
   const token =
@@ -14,7 +14,10 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
 
   try {
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    const user = await UserModel.findById(decodedToken?._id).select();
+    const user = await AuthenticatedUserModel.findById(decodedToken?.id).select(
+      "-password -__v -createdAt -updatedAt"
+    );
+
     if (!user) {
       // Client should make a request to /api/v1/users/refresh-token if they have refreshToken present in their cookie
       // Then they will get a new access token which will allow them to refresh the access token without logging out the user
@@ -28,4 +31,3 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     throw new ApiError(401, error?.message || "Invalid access token");
   }
 });
-

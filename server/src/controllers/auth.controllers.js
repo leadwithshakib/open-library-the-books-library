@@ -50,7 +50,6 @@ export const signUp = asyncHandler(async (req, res) => {
   }
   await newUser.save({ validateBeforeSave: false });
 
-  // Create user profile in UserModel (stores public profile info)
   const userProfile = await UserModel.create({
     authUserId: newUser._id,
     name: newUser.name,
@@ -60,12 +59,11 @@ export const signUp = asyncHandler(async (req, res) => {
       .toUpperCase()}`,
   });
 
-  if (!userProfile) {
-    // Output: 500 Internal Server Error if profile creation fails
-    throw new ApiError(500, "Failed to create user profile", []);
+  if (!newUser) {
+    return next(new Error("Error while creating user profile"));
   }
-
-  await userProfile.save({ validateBeforeSave: false });
+  await newUser.save({ validateBeforeSave: false });
+  // Send verification email to the user
 
   // Generate a temporary verification code for email verification
   const temporaryCode = newUser.generateTemporaryCode();
@@ -83,7 +81,6 @@ export const signUp = asyncHandler(async (req, res) => {
     // Output: 500 Internal Server Error if verification record creation fails
     throw new ApiError(500, "Failed to create verification record", []);
   }
-
   // Send verification email to the user
   await sendMail(SendMailEnum.VERIFY_EMAIL, {
     to: newUser.email,
@@ -288,4 +285,105 @@ export const signOut = asyncHandler(async (req, res) => {
     success: true,
     message: "User signed out successfully",
   });
+});
+
+export const verifyEmail = asyncHandler(async (req, res) => {
+  const { verificationCode } = req.body;
+  if (!verificationCode) {
+    throw new ApiError(400, "Verification code is required", []);
+  }
+
+  const verification = await VerificationModel.findOne({
+    verificationCode,
+    status: "PENDING",
+    for: "VERIFY_EMAIL",
+  });
+
+  if (!verification) {
+    throw new ApiError(404, "Invalid or expired verification code", []);
+  }
+
+  if (verification.expiresAt < new Date()) {
+    throw new ApiError(410, "Verification code has expired", []);
+  }
+
+  const user = await AuthenticatedUserModel.findById(verification.authUserId);
+  if (!user) {
+    throw new ApiError(404, "User not found", []);
+  }
+
+  user.verified = true;
+  await user.save();
+
+  verification.status = "COMPLETED";
+  await verification.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Email verified successfully",
+  });
+});
+
+export const resendVerificationEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new ApiError(400, "Email is required", []);
+  }
+
+  const user = await AuthenticatedUserModel.findOne({ email, type: "EMAIL" });
+  if (!user) {
+    throw new ApiError(404, "User not found", []);
+  }
+
+  if (user.verified) {
+    throw new ApiError(400, "Email is already verified", []);
+  }
+
+  const temporaryCode = user.generateTemporaryCode();
+  const newVerification = await VerificationModel.create({
+    authUserId: user._id,
+    verificationCode: temporaryCode,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000), // Expires in 10 minutes
+    type: "EMAIL",
+    status: "PENDING",
+    for: "VERIFY_EMAIL",
+  });
+
+  if (!newVerification) {
+    throw new ApiError(500, "Failed to create verification record", []);
+  }
+
+  await sendMail(SendMailEnum.VERIFY_EMAIL, {
+    to: user.email,
+    verificationCode: temporaryCode,
+    name: user.name,
+    expiredAfter: "10 minutes",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Verification email resent successfully",
+  });
+});
+export const handleSocialLogin = asyncHandler(async (req, res) => {
+  const user = await AuthenticatedUserModel.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  const accessToken = user.generateAccessToken();
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  };
+
+  return res
+    .status(301)
+    .cookie("access_token", accessToken, options) // set the access token in the cookie
+    .redirect(
+      // redirect user to the frontend with access and refresh token in case user is not using cookies
+      `${process.env.CLIENT_SSO_REDIRECT_URL}?accessToken=${accessToken}`
+    );
 });
