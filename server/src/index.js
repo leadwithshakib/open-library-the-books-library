@@ -9,7 +9,7 @@ const majorNodeVersion = +process.env.NODE_VERSION?.split(".")[0] || 0;
 const startServer = () => {
   httpServer.listen(port || 8080, () => {
     logger.info(
-      `📑 Visit the documentation at: http://localhost:${port || 8080}/docs`
+      `📑 Visit the documentation at: http://localhost:${port || 8080}/`
     );
     logger.info("⚙️  Server is running on port: " + process.env.PORT);
   });
