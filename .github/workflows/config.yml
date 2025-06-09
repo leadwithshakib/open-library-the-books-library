@@ -27,9 +27,11 @@ jobs:
         run: docker compose up -d
 
       - name: Install dependencies
+        working-directory: server
         run: npm install
 
       - name: Start server
+        working-directory: server
         run: npm start &
         env:
           PORT: 3000
@@ -38,6 +40,7 @@ jobs:
         run: sleep 10
 
       - name: Run tests
+        working-directory: server
         run: npm test
 
       - name: Stop server
