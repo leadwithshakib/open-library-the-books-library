@@ -1,0 +1,45 @@
+name: Server and Test Workflow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Go to server directory
+        run: cd server
+
+      - name: Run Docker Compose file
+        run: docker compose up -d
+
+      - name: Install dependencies
+        run: npm install
+
+
+      - name: Start server
+        run: npm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for server to start
+        run: sleep 10
+
+      - name: Run tests
+        run: npm test
+
+      - name: Stop server
+        run: |
+          pkill -f "node.*start" || true
