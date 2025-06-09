@@ -5,6 +5,7 @@ import React, { useCallback, useState } from "react";
 import {
   Dimensions,
   Image,
+  StatusBar,
   Pressable,
   RefreshControl,
   SafeAreaView,
@@ -59,6 +60,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar hidden />
       <ScrollView
         style={styles.scrollView}
         refreshControl={

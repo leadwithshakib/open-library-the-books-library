@@ -1,11 +1,18 @@
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function Index() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
+      <StatusBar hidden />
       <View style={styles.content}>
         <Text style={styles.title}>Welcome to Open Library</Text>
         <Text style={styles.subtitle}>Your Gateway to Knowledge</Text>
@@ -14,6 +21,12 @@ export default function Index() {
           onPress={() => router.push("/auth/sign-in")}
         >
           <Text style={styles.buttonText}>Sign In</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/(tabs)")}
+        >
+          <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </View>
     </View>
