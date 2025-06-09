@@ -222,6 +222,10 @@ app.use(morganMiddleware);
 app.post("/seeds/add-books", verifyJWT, verifyAdmin, addBooks);
 app.use(routes);
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ message: "Server is healthy" });
+});
+
 // * API DOCS
 // ? Keeping swagger code at the end so that we can load swagger on "/" route
 app.use(
