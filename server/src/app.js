@@ -16,10 +16,12 @@ import { fileURLToPath } from "url";
 import YAML from "yaml";
 import { UserRoleEnum } from "./constants.js";
 import morganMiddleware from "./logger/morgan.logger.js";
+import { verifyAdmin, verifyJWT } from "./middlewares/auth.middlewares.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 import { AuthenticatedUserModel } from "./models/auth/authenticated-user.model.js";
 import { UserModel } from "./models/auth/user.model.js";
 import { routes } from "./routes/index.js";
+import { addBooks } from "./seeds/books.seeds.js";
 import { ApiError } from "./utils/ApiError.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -42,7 +44,7 @@ app.use(express.static("public")); // configure static file to save images local
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: process.env.CLIENT_SSO_REDIRECT_URL || "*",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow cookies to be sent with requests
@@ -217,6 +219,7 @@ app.use(passport.session()); // persistent login sessions
 
 app.use(morganMiddleware);
 
+app.post("/seeds/add-books", verifyJWT, verifyAdmin, addBooks);
 app.use(routes);
 
 // * API DOCS

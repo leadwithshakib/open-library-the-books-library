@@ -7,6 +7,6 @@ import {
 
 export const favoriteRouter = express.Router();
 
-favoriteRouter.post("/", makeItMyFavorite);
+favoriteRouter.post("/:bookId", makeItMyFavorite);
 favoriteRouter.get("/", getMyFavorites);
 favoriteRouter.delete("/:bookId", deleteFavorite);

@@ -9,6 +9,7 @@ import {
   signOut,
   signUp,
   verifyEmail,
+  verifyToken,
 } from "../controllers/auth.controllers.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
@@ -21,6 +22,7 @@ authRouter.post("/reset-password", resetPassword);
 authRouter.post("/sign-out", verifyJWT, signOut);
 authRouter.post("/verify-email", verifyEmail);
 authRouter.post("/resend-verification-email", resendVerificationEmail);
+authRouter.post("/verify-token", verifyToken);
 // SSO routes
 authRouter.route("/google").get(
   passport.authenticate("google", {

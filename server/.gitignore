@@ -136,9 +136,10 @@ logs
 /.vscode
 /.idea
 
-# ignore the image files uploaded in the public/images folder
+# ignore the image and pdf files uploaded in the public/images & public/pdf folder
 /public/images/*
 /public/temp/*
+/public/pdf/*
 
 # except .gitkeep to push empty folder to the git repo
 !/public/images/.gitkeep
@@ -152,3 +153,5 @@ NOTES.md
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+

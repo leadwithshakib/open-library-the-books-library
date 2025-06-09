@@ -1,38 +1,61 @@
+import { Review } from "../models/review.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { Book } from "../models/book.model.js";
 
 export const giveAReview = asyncHandler(async (req, res) => {
   const { bookId } = req.params;
-  const { rating, review } = req.body;
+  const { rating, comment } = req.body;
 
+  const existBook = await Book.findById(bookId);
+  if (!existBook) {
+    throw new ApiError(404, "Book not found.");
+  }
   // Validate input
-  if (!rating || !review) {
+  if (!rating || !comment) {
     return res.status(400).json({ message: "Rating and review are required." });
   }
 
   // Assuming we have a Review model to handle database operations
   const newReview = await Review.create({
     bookId,
-    userId: req.user._id,
+    userId: req.profile._id,
     rating,
-    review,
+    comment,
   });
 
-  res.status(201).json(newReview);
+  return res
+    .status(201)
+    .json(new ApiResponse(201, newReview, "Review created successfully"));
 });
 export const getReviewsByBook = asyncHandler(async (req, res) => {
   const { bookId } = req.params;
 
-  // Assuming we have a Review model to handle database operations
-  const reviews = await Review.find({ bookId }).populate(
-    "userId",
-    "name avatar"
+  // Pagination parameters from query string, with defaults
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  // Get total count for pagination info
+  const totalReviews = await Review.countDocuments({ bookId });
+
+  // Fetch paginated reviews
+  const reviews = await Review.find({ bookId })
+    .populate("userId", "name avatar")
+    .skip(skip)
+    .limit(limit);
+
+  res.status(200).json(
+    new ApiResponse(200, reviews, "Reviews fetched successfully", {
+      totalReviews,
+      page,
+      limit,
+      totalPages: Math.ceil(totalReviews / limit),
+      hasNextPage: page * limit < totalReviews,
+      hasPrevPage: page > 1,
+    })
   );
-
-  if (!reviews || reviews.length === 0) {
-    return res.status(404).json({ message: "No reviews found for this book." });
-  }
-
-  res.status(200).json(reviews);
 });
 export const deleteReview = asyncHandler(async (req, res) => {
   const { reviewId } = req.params;
@@ -41,38 +64,49 @@ export const deleteReview = asyncHandler(async (req, res) => {
   const review = await Review.findById(reviewId);
 
   if (!review) {
-    return res.status(404).json({ message: "Review not found." });
+    throw new ApiError(404, "Review not found.");
   }
 
   // Check if the user is authorized to delete the review
-  if (review.userId.toString() !== req.user._id.toString()) {
-    return res
-      .status(403)
-      .json({ message: "You are not authorized to delete this review." });
+  if (review.userId.toString() !== req.profile._id.toString()) {
+    throw new ApiError(403, "You are not authorized to delete this review.");
   }
 
-  await review.remove();
-  res.status(200).json({ message: "Review deleted successfully." });
+  await review.deleteOne();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Review deleted successfully", null));
 });
 export const updateReview = asyncHandler(async (req, res) => {
   const { reviewId } = req.params;
-  const { rating, review } = req.body;
+  const { rating, comment } = req.body;
 
+  const review = await Review.findById(reviewId);
+  if (!review) {
+    throw new ApiError(404, "Review not found.");
+  }
+
+  if (review.userId.toString() !== req.profile._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this review.");
+  }
   // Validate input
-  if (!rating || !review) {
-    return res.status(400).json({ message: "Rating and review are required." });
+  if (!rating || !comment) {
+    throw new ApiError(400, "Rating and review are required.");
   }
 
   // Assuming we have a Review model to handle database operations
   const updatedReview = await Review.findByIdAndUpdate(
     reviewId,
-    { rating, review },
+    { rating, comment },
     { new: true }
   );
 
   if (!updatedReview) {
-    return res.status(404).json({ message: "Review not found." });
+    throw new ApiError(404, "Review not found.");
   }
 
-  res.status(200).json(updatedReview);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedReview, "Review updated successfully"));
 });

@@ -9,13 +9,19 @@ const reviewSchema = new mongoose.Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "users",
       required: true,
     },
-    review: {
+    comment: {
       type: String,
       trim: true,
       default: "",
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
     },
   },
   { timestamps: true }

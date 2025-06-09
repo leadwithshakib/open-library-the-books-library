@@ -16,7 +16,7 @@ import { sendMail } from "../utils/mail.js";
 // Handles user signup: validates input, checks for existing user, creates authentication and profile records, sends verification email, and returns the created user profile.
 export const signUp = asyncHandler(async (req, res) => {
   // Extract user details from request body
-  const { name, email, password } = req.body;
+  const { name, email, password, confirmPassword } = req.body;
 
   // Validate input using Zod schema
   const parsedBody = signUpSchema.safeParse(req.body);
@@ -25,6 +25,11 @@ export const signUp = asyncHandler(async (req, res) => {
     return res
       .status(400)
       .json({ success: false, error: parsedBody.error.errors });
+  }
+  // Check if password and confirmPassword match
+  if (password !== confirmPassword) {
+    // Output: 400 Bad Request if passwords do not match
+    throw new ApiError(400, "Passwords do not match", []);
   }
 
   // Check if user already exists in the UserModel collection
@@ -386,4 +391,20 @@ export const handleSocialLogin = asyncHandler(async (req, res) => {
       // redirect user to the frontend with access and refresh token in case user is not using cookies
       `${process.env.CLIENT_SSO_REDIRECT_URL}?accessToken=${accessToken}`
     );
+});
+
+export const verifyToken = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  if (!token) {
+    throw new ApiError(400, "Token is required");
+  }
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  if (!decoded) {
+    throw new ApiError(401, "Invalid token");
+  }
+  res.status(200).json({
+    success: true,
+    message: "Token verified successfully",
+    decoded,
+  });
 });

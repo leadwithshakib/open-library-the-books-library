@@ -32,3 +32,18 @@ export const UserStatusEnum = {
   SUSPENDED: "SUSPENDED",
   DELETED: "DELETED",
 };
+
+
+export const BookGenreEnum = {
+  FICTION: "Fiction",
+  NON_FICTION: "Non-Fiction",
+  SCIENCE_FICTION: "Science Fiction",
+  FANTASY: "Fantasy",
+  BIOGRAPHY: "Biography",
+  HISTORY: "History",
+  MYSTERY: "Mystery",
+  ROMANCE: "Romance",
+  HORROR: "Horror",
+  PROGRAMMING: "Programming",
+  OTHER: "Other",
+};

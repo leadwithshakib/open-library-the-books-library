@@ -3,7 +3,7 @@ import { giveAReview, getReviewsByBook, updateReview, deleteReview } from '../co
 
 export const reviewRouter = express.Router();
 
-reviewRouter.post('/', giveAReview);
+reviewRouter.post('/:bookId', giveAReview);
 reviewRouter.get('/:bookId', getReviewsByBook);
 reviewRouter.delete('/:reviewId', deleteReview);
 reviewRouter.put('/:reviewId', updateReview);

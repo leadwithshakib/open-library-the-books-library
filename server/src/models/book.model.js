@@ -7,6 +7,11 @@ const bookSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    description: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     author: {
       type: String,
       required: true,
@@ -30,6 +35,7 @@ const bookSchema = new mongoose.Schema(
         "Mystery",
         "Romance",
         "Horror",
+        "Programming",
         "Other",
       ],
     },
@@ -54,8 +60,7 @@ const bookSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
-    toBuyUrl: {
-      // Corrected camelCase
+    buyHardCopyFrom: {
       type: String,
       trim: true,
       default: "",
