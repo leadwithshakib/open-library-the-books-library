@@ -1,0 +1,98 @@
+---
+title: Mobile App Documentation
+description: Documentation for the Open Library mobile application
+---
+
+# Mobile App Documentation
+
+## Overview
+
+The Open Library mobile app is built using React Native and Expo, providing a cross-platform solution for iOS and Android devices.
+
+## Prerequisites
+
+- Node.js (v14 or higher)
+- Expo CLI
+- iOS Simulator (for Mac users)
+- Android Studio (for Android development)
+- Git
+
+## Setup
+
+1. Navigate to the mobile app directory:
+
+```bash
+cd app
+```
+
+2. Install dependencies:
+
+```bash
+npx expo install
+```
+
+3. Start the development server:
+
+```bash
+npx expo start
+```
+
+## Development
+
+### Running on Different Platforms
+
+- **iOS Simulator**: Press `i` in the terminal or click "Run on iOS simulator" in Expo Dev Tools
+- **Android Emulator**: Press `a` in the terminal or click "Run on Android device/emulator" in Expo Dev Tools
+- **Physical Device**: Scan the QR code with the Expo Go app
+
+
+## Features
+
+- Book browsing and searching
+- User authentication
+- Reading progress tracking
+- Offline reading support
+- Push notifications
+
+## Environment Setup
+
+Create a `.env` file in the app directory:
+
+```env
+EXPO_PUBLIC_BACKEND_URL=http://localhost:7000
+```
+
+## Building for Production
+
+### iOS Build
+
+```bash
+eas build --platform ios
+```
+
+### Android Build
+
+```bash
+eas build --platform android
+```
+
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Metro Bundler Issues**
+
+   - Clear cache: `npx expo start -c`
+   - Reset watchman: `watchman watch-del-all`
+
+2. **Build Failures**
+
+   - Check Expo SDK version compatibility
+   - Verify all dependencies are installed
+   - Clear build cache
+
+3. **Performance Issues**
+   - Enable Hermes engine
+   - Optimize images and assets
+   - Use performance monitoring tools

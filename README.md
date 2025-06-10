@@ -63,6 +63,12 @@ npm install
 npm run dev
 ```
 
+## 📚 Extended Documentation
+
+For detailed documentation, visit our docs page:
+
+[Open Library Documentation](https://docs.page/leadwithshakib/open-library-the-books-library)
+
 ## 📧 Email Service
 
 The project uses Mailhog for email testing. You can access the Mailhog interface at:
@@ -75,10 +81,9 @@ http://localhost:8025
 
 Contributions are always welcome!
 
-See `contributing.md` for ways to get started.
+See `CONTRIBUTING.md` for ways to get started.
 
 Please adhere to this project's `code of conduct`.
-
 
 ## Demo
 

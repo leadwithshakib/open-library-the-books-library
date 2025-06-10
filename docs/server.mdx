@@ -1,0 +1,74 @@
+---
+title: Server Documentation
+description: Documentation for the Server project
+---
+
+
+This document provides comprehensive information about setting up and running the server component of the Open Library project.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- Git
+
+## Installation
+
+1. Navigate to the server directory:
+
+```bash
+cd server
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up environment variables:
+   Create a `.env` file in the server directory with the following variables:
+
+```env
+PORT=7000
+MONGODB_URI=mongodb://localhost:27017
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REFRESH_TOKEN_SECRET="your_refresh_token_secret"
+ACCESS_TOKEN_SECRET="your_access_token_secret"
+ACCESS_TOKEN_EXPIRATION="15m"
+REFRESH_TOKEN_EXPIRATION="7d"
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:7000/auth/google/callback
+EXPRESS_SESSION_SECRET="your_express_session_secret"
+CLIENT_SSO_REDIRECT_URL=http://localhost:3000
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_CALLBACK_URL=http://localhost:7000/auth/github/callback
+BACKEND_URL=http://localhost:7000
+```
+
+## Running the Server
+
+### Development Mode
+
+To run the server in development mode with hot-reloading:
+
+```bash
+npm run dev
+```
+
+## Contributing
+
+Please read our [Contributing Guidelines](../CONTRIBUTING.md) before submitting pull requests.
+
+## Support
+
+If you encounter any issues or have questions, please:
+
+1. Check the [FAQ](../FAQ.md)
+2. Open an issue on GitHub
+3. Contact the maintainers

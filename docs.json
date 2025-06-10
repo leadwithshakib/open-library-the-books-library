@@ -1,19 +1,39 @@
 {
-  "name": "My Docs",
-  "description": "My documentation site",
+  "name": "Open Library",
+  "description": "Open-source book library management project",
   "sidebar": [
   {
-    "group": "Getting Started",
+    "group": "How to run the project",
     "pages": [
       {
-        "title": "Getting to know docs.page",
+        "title": "Welcome",
         "href": "/",
-        "icon": "rocket"
+        "icon": "home"
       },
       {
-        "title": "Next Steps",
-        "href": "/next-steps",
-        "icon": "arrow-right"
+        "title": "Docker",
+        "href": "/docker",
+        "icon": "docker"
+      },
+      {
+        "title": "Email Service",
+        "href": "/email-service",
+        "icon": "message"
+      },
+      {
+        "title": "Server",
+        "href": "/server",
+        "icon": "server"
+      },
+      {
+        "title": "Web App",
+        "href": "/web",
+        "icon": "user"
+      },
+      {
+        "title": "Mobile App",
+        "href": "/mobile",
+        "icon": "mobile"
       }
     ]
   }

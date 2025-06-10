@@ -1,0 +1,81 @@
+---
+title: Email Service Documentation
+description: Documentation for the Open Library Email Service component
+---
+
+
+The Email Service component of Open Library handles all email-related functionality. It's built with Node.js and provides a robust, scalable solution for sending emails across the application. The service integrates with Redis for job queuing and uses MailHog for email testing in development environments.
+
+## Features
+
+- Asynchronous email processing
+- Email queue management with Redis
+- Support for HTML and plain text emails
+- Email templates
+- Development environment testing with MailHog
+- Error handling and retry mechanisms
+- Email tracking and logging
+
+## Setup
+
+1. Navigate to the email-service directory:
+
+```bash
+cd email-service
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Start the development service:
+
+```bash
+npm run dev
+```
+
+## Environment Variables
+
+Create a `.env` file in the server directory with the following variables:
+
+```env
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# SMTP Configuration
+MAILHOG_SMTP_HOST=localhost
+MAILHOG_SMTP_PORT=1025
+
+```
+
+
+## Development
+
+### Testing with MailHog
+
+MailHog provides a local SMTP server for testing emails. Access the MailHog web interface at:
+
+```
+http://localhost:8025
+```
+
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **Emails not sending**
+
+   - Check MAILHOG configuration
+   - Verify Redis connection
+   - Check email service logs
+
+2. **Queue processing delays**
+   - Monitor Redis memory usage
+   - Check worker process status
+   - Review error logs
+
+
