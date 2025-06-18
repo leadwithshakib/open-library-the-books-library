@@ -1,17 +1,66 @@
+import axios from "axios";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function VerifyEmail() {
   const router = useRouter();
   const { email } = useLocalSearchParams();
   const [isResending, setIsResending] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleResendVerification = () => {
-    // TODO: Implement resend verification email logic
     setIsResending(true);
     console.log("Resending verification email to:", email);
     setTimeout(() => setIsResending(false), 2000);
+  };
+
+  const handleVerifyEmail = async () => {
+    if (verificationCode.length !== 6) {
+      Alert.alert("Error", "Please enter a valid 6-digit verification code");
+      return;
+    }
+
+    setIsVerifying(true);
+    try {
+      const response = await axios.post(
+        "http://192.168.0.106:7000/auth/verify-email",
+        {
+          verificationCode,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            // Note: You'll need to get the actual token from your auth context or storage
+            Authorization: `Bearer ${"YOUR_TOKEN_HERE"}`,
+          },
+        }
+      );
+
+      if (response.data) {
+        Alert.alert("Success", "Email verified successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.push("/auth/sign-in"),
+          },
+        ]);
+      }
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        (error as any).response?.data?.message || "Failed to verify email"
+      );
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -21,9 +70,28 @@ export default function VerifyEmail() {
         <Text style={styles.subtitle}>We've sent a verification email to:</Text>
         <Text style={styles.email}>{email}</Text>
         <Text style={styles.instructions}>
-          Please check your email and click the verification link to continue.
-          If you don't see the email, check your spam folder.
+          Please enter the 6-digit verification code sent to your email.
         </Text>
+
+        <TextInput
+          style={styles.input}
+          value={verificationCode}
+          onChangeText={setVerificationCode}
+          placeholder="Enter 6-digit code"
+          keyboardType="number-pad"
+          maxLength={6}
+          placeholderTextColor="#95a5a6"
+        />
+
+        <TouchableOpacity
+          style={[styles.button, isVerifying && styles.buttonDisabled]}
+          onPress={handleVerifyEmail}
+          disabled={isVerifying}
+        >
+          <Text style={styles.buttonText}>
+            {isVerifying ? "Verifying..." : "Verify Email"}
+          </Text>
+        </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, isResending && styles.buttonDisabled]}
@@ -78,9 +146,22 @@ const styles = StyleSheet.create({
   instructions: {
     fontSize: 16,
     color: "#7f8c8d",
-    marginBottom: 30,
+    marginBottom: 20,
     textAlign: "center",
     lineHeight: 24,
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "white",
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: "center",
+    letterSpacing: 8,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
   },
   button: {
     backgroundColor: "#3498db",

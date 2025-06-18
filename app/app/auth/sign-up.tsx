@@ -1,7 +1,9 @@
 import { AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -18,13 +20,33 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleSignUp = () => {
-    // TODO: Implement actual sign up logic
+  const handleSignUp = async () => {
     if (password !== confirmPassword) {
-      console.log("Passwords do not match");
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
-    console.log("Sign up with:", name, email, password);
+
+    try {
+      const response = await axios.post(
+        "http://192.168.0.106:7000/auth/sign-up",
+        {
+          name,
+          email,
+          password,
+          confirmPassword,
+        }
+      );
+
+      if (response.data) {
+        Alert.alert("Success", "Account created successfully!");
+        router.push("/auth/verify-email");
+      }
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Failed to create account"
+      );
+    }
   };
 
   const handleGoogleSignUp = () => {

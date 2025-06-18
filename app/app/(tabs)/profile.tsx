@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -28,6 +29,11 @@ const userReviews: (Review & { bookId: string })[] = [
 export default function Profile() {
   const router = useRouter();
 
+  const handleLogout = () => {
+    AsyncStorage.removeItem("token");
+    router.replace("/auth/sign-in");
+  };
+
   const renderStars = (rating: number) => {
     return (
       <View style={styles.stars}>
@@ -50,6 +56,10 @@ export default function Profile() {
           <Ionicons name="person-circle" size={40} color="#666" />
           <Text style={styles.username}>John Doe</Text>
         </View>
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={24} color="#DC3545" />
+          <Text style={styles.logoutText}>Logout</Text>
+        </Pressable>
       </View>
 
       <View style={styles.reviewsSection}>
@@ -99,6 +109,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#E9ECEF",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   profileInfo: {
     flexDirection: "row",
@@ -164,5 +177,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6C757D",
     fontStyle: "italic",
+  },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "#FFF5F5",
+  },
+  logoutText: {
+    color: "#DC3545",
+    fontSize: 16,
+    fontWeight: "500",
   },
 });

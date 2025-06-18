@@ -2,17 +2,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Book } from "../types/book";
+import { Book } from "../app/types/book";
 
-interface BookCardProps {
+export const BookCard: React.FC<{
   book: Book;
   onToggleFavorite: (id: string) => void;
-}
-
-export const BookCard: React.FC<BookCardProps> = ({
-  book,
-  onToggleFavorite,
-}) => {
+}> = ({ book, onToggleFavorite }) => {
   const router = useRouter();
 
   return (

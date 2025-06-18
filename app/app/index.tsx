@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import {
   StatusBar,
@@ -10,22 +11,22 @@ import {
 export default function Index() {
   const router = useRouter();
 
+  const handleGetStarted = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (token) {
+      router.push("/(tabs)");
+    } else {
+      router.push("/auth/sign-in");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
       <View style={styles.content}>
         <Text style={styles.title}>Welcome to Open Library</Text>
         <Text style={styles.subtitle}>Your Gateway to Knowledge</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/auth/sign-in")}
-        >
-          <Text style={styles.buttonText}>Sign In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/(tabs)")}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </View>

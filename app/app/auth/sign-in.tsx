@@ -1,7 +1,13 @@
 import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -13,10 +19,26 @@ export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSignIn = () => {
-    // TODO: Implement actual sign in logic
-    console.log("Sign in with:", email, password);
+  const handleSignIn = async () => {
+    try {
+      setError("");
+      const { data } = await axios.post(
+        "http://192.168.0.106:7000/auth/sign-in",
+        {
+          email,
+          password,
+        }
+      );
+      await AsyncStorage.setItem("token", data.accessToken);
+      router.push("/(tabs)");
+    } catch (err: any) {
+      console.error("Sign in error:", err);
+      setError(
+        err.response?.data?.message || "Failed to sign in. Please try again."
+      );
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -30,80 +52,90 @@ export default function SignIn() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>Sign In</Text>
-        <Text style={styles.subtitle}>Welcome back to Open Library</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <StatusBar hidden />
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.formContainer}>
+          <Text style={styles.title}>Sign In</Text>
+          <Text style={styles.subtitle}>Welcome back to Open Library</Text>
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
-        </View>
+          <View style={styles.inputContainer}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSignIn}>
-          <Text style={styles.buttonText}>Sign In</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleSignIn}>
+            <Text style={styles.buttonText}>Sign In</Text>
+          </TouchableOpacity>
 
-        <View style={styles.links}>
+          <View style={styles.links}>
+            <TouchableOpacity
+              onPress={() => router.push("/auth/forgot-password")}
+            >
+              <Text style={styles.linkText}>Forgot Password?</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/auth/sign-up")}>
+              <Text style={styles.linkText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <View style={styles.socialButtons}>
+            <TouchableOpacity
+              style={[styles.socialButton, styles.googleButton]}
+              onPress={handleGoogleSignIn}
+            >
+              <AntDesign name="google" size={24} color="#DB4437" />
+              <Text style={[styles.socialButtonText, styles.googleButtonText]}>
+                Google
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.socialButton, styles.githubButton]}
+              onPress={handleGithubSignIn}
+            >
+              <FontAwesome name="github" size={24} color="#333" />
+              <Text style={[styles.socialButtonText, styles.githubButtonText]}>
+                GitHub
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity
-            onPress={() => router.push("/auth/forgot-password")}
+            style={styles.backButton}
+            onPress={() => router.back()}
           >
-            <Text style={styles.linkText}>Forgot Password?</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push("/auth/sign-up")}>
-            <Text style={styles.linkText}>Create Account</Text>
+            <Text style={styles.backButtonText}>Back to Home</Text>
           </TouchableOpacity>
         </View>
-
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or continue with</Text>
-          <View style={styles.dividerLine} />
-        </View>
-
-        <View style={styles.socialButtons}>
-          <TouchableOpacity
-            style={[styles.socialButton, styles.googleButton]}
-            onPress={handleGoogleSignIn}
-          >
-            <AntDesign name="google" size={24} color="#DB4437" />
-            <Text style={[styles.socialButtonText, styles.googleButtonText]}>
-              Google
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.socialButton, styles.githubButton]}
-            onPress={handleGithubSignIn}
-          >
-            <FontAwesome name="github" size={24} color="#333" />
-            <Text style={[styles.socialButtonText, styles.githubButtonText]}>
-              GitHub
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.backButtonText}>Back to Home</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -112,11 +144,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   formContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    minHeight: "100%",
   },
   title: {
     fontSize: 32,
@@ -233,5 +269,9 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: "#3498db",
     fontSize: 16,
+  },
+  errorText: {
+    color: "red",
+    marginBottom: 10,
   },
 });

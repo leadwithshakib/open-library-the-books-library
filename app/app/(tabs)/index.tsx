@@ -1,30 +1,70 @@
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Dimensions,
   Image,
-  StatusBar,
   Pressable,
   RefreshControl,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { BookCard } from "../../components/BookCard";
-import { BookCategory, books as initialBooks } from "../../data/books";
-import { Book } from "../../types/book";
+import { ApiResponse, Book, BookCategory } from "../types/book";
 
 const { width } = Dimensions.get("window");
 
 export default function Index() {
-  const [books, setBooks] =
-    useState<(Book & { category: BookCategory })[]>(initialBooks);
+  const [books, setBooks] = useState<Book[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
+
+  const fetchBooks = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        router.push("/auth/sign-in");
+        return;
+      }
+
+      const response = await axios.get<ApiResponse<any[]>>(
+        "http://192.168.0.106:7000/books?field=title,author,coverImage,genre",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        const mappedBooks = response.data.data.map((book) => ({
+          id: book._id,
+          title: book.title,
+          author: book.author,
+          coverImage: book.coverImage,
+          category: book.genre as BookCategory,
+          rating: book.reviewStats?.averageRating || 0,
+          description: "", // Add description if available in API
+          isFavorite: false,
+          reviewStats: book.reviewStats,
+        }));
+        setBooks(mappedBooks);
+      }
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
 
   const handleToggleFavorite = (id: string) => {
     setBooks(
@@ -36,27 +76,38 @@ export default function Index() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Simulate a refresh by resetting to initial books
-    // In a real app, you would fetch fresh data from an API
-    setTimeout(() => {
-      setBooks(initialBooks);
+    fetchBooks().finally(() => {
       setRefreshing(false);
-    }, 1000);
+    });
   }, []);
 
   const categories: BookCategory[] = [
-    "Classics",
-    "Fantasy",
-    "Contemporary",
-    "Philosophical",
-    "Thriller",
-    "Historical",
+    "Fiction",
+    "Non-Fiction",
+    "Programming",
+    "Science Fiction",
+    "Biography",
+    "Mystery",
   ];
 
   // Get the highest rated book for the hero section
-  const featuredBook = books.reduce((prev, current) =>
-    (current.rating || 0) > (prev.rating || 0) ? current : prev
-  );
+  const featuredBook =
+    books.length > 0
+      ? books.reduce((prev, current) =>
+          (current.rating || 0) > (prev.rating || 0) ? current : prev
+        )
+      : null;
+
+  if (!featuredBook) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar hidden />
+        <View style={styles.loadingContainer}>
+          <Text>Loading books...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -100,6 +151,11 @@ export default function Index() {
                 <Text style={styles.heroRatingText}>
                   {featuredBook.rating?.toFixed(1)}
                 </Text>
+                {featuredBook.reviewStats && (
+                  <Text style={styles.reviewCount}>
+                    ({featuredBook.reviewStats.reviewCount} reviews)
+                  </Text>
+                )}
               </View>
               <Text style={styles.heroDescription} numberOfLines={2}>
                 {featuredBook.description}
@@ -168,7 +224,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   heroContent: {
-    paddingBottom: 20,
+    paddingBottom: 0,
   },
   heroTitle: {
     fontSize: 28,
@@ -191,6 +247,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#fff",
   },
+  reviewCount: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: "#fff",
+    opacity: 0.8,
+  },
   heroDescription: {
     fontSize: 16,
     color: "#fff",
@@ -212,5 +274,10 @@ const styles = StyleSheet.create({
   bookWrapper: {
     width: 200,
     marginHorizontal: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
