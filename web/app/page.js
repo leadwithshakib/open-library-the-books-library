@@ -1,12 +1,12 @@
 "use client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 export default function Home() {
   const [books, setBooks] = useState([]);
   const router = useRouter();
 
-  const handleGetBooks = async () => {
+  const handleGetBooks = useCallback(async () => {
     try {
       const data = await axios.get("http://localhost:3000/api/tokens");
       if (data.data.token) {
@@ -29,8 +29,8 @@ export default function Home() {
           router.push("/auth/sign-in");
         }
       }
-    }
-  };
+    } 
+  }, []);
 
   useEffect(() => {
     handleGetBooks();
@@ -51,7 +51,9 @@ export default function Home() {
         <button
           className="bg-red-500 text-white px-4 py-2 rounded-md ml-auto mr-2 cursor-pointer"
           onClick={async () => {
-            const response = await axios.delete("http://localhost:3000/api/tokens");
+            const response = await axios.delete(
+              "http://localhost:3000/api/tokens"
+            );
             if (response.status === 200) {
               router.push("/auth/sign-in");
             }

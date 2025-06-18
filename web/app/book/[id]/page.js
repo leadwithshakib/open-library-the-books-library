@@ -2,28 +2,38 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function BookDetail() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
 
-  const handleGetBook = async () => {
+  const handleGetBook = useCallback(async () => {
     try {
+      const token = await axios.get("http://localhost:3000/api/tokens");
+      if (token.data.token) {
       const response = await axios.get(`http://localhost:7000/books/${id}`, {
         headers: {
-          Authorization: `Bearer ${Cookies.get("access_token")}`,
-        },
-      });
-      setBook(response.data.data);
+          Authorization: `Bearer ${token.data.token}`,
+          },
+        });
+        setBook(response.data.data);
+      }
     } catch (error) {
       console.log(error);
+      if (error.response.status === 401) {
+        console.log("Unauthorized");
+        const response = await axios.delete("http://localhost:3000/api/tokens");
+        if (response.status === 200) {
+          router.push("/auth/sign-in");
+        }
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     handleGetBook();
-  }, [id]);
+  }, []);
 
   if (!book)
     return (

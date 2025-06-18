@@ -6,43 +6,36 @@ import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
-export default function SignIn() {
+export default function SignUp() {
   const router = useRouter();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSignIn = async () => {
+  const handleSignUp = async () => {
     try {
-      const response = await axios.post("http://localhost:7000/auth/sign-in", {
+      const response = await axios.post("http://localhost:7000/auth/sign-up", {
+        name: name,
         email: email,
         password: password,
+        confirmPassword: confirmPassword,
       });
-      const token = response.data.accessToken;
-      if (token) {
-        const response = await axios.post("http://localhost:3000/api/tokens", {
-          token: token,
-        });
-        if (response.status === 200) {
-          router.push("/");
-        }
+      if (response.status === 201) {
+        router.push("/auth/verify-email");
       }
     } catch (error) {
       console.log(error);
-      if (error.response.status === 401) {
-        console.log("Unauthorized");
-        const response = await axios.delete("http://localhost:3000/api/tokens");
-        if (response.status === 200) {
-          router.push("/auth/sign-in");
-        }
-      }
     }
   };
 
   const handleGoogleSignIn = () => {
+    // Implement Google sign-in logic
     redirect("http://localhost:7000/auth/google");
   };
 
   const handleGithubSignIn = () => {
+    // Implement Github sign-in logic
     redirect("http://localhost:7000/auth/github");
   };
 
@@ -51,11 +44,18 @@ export default function SignIn() {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Create your account
           </h2>
         </div>
         <div className="mt-8 space-y-6">
           <div className="space-y-4">
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            />
             <input
               type="email"
               placeholder="Email"
@@ -70,40 +70,21 @@ export default function SignIn() {
               onChange={(e) => setPassword(e.target.value)}
               className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
             />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <Link
-                href="/auth/forgot-password"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Forgot your password?
-              </Link>
-            </div>
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+            />
           </div>
 
           <div>
             <button
-              onClick={handleSignIn}
+              onClick={handleSignUp}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Sign in
+              Sign Up
             </button>
           </div>
 
@@ -135,18 +116,18 @@ export default function SignIn() {
                 Github
               </button>
             </div>
-          </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
-              <Link
-                href="/auth/sign-up"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
-              >
-                Sign up
-              </Link>
-            </p>
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-600">
+                Already have an account?{" "}
+                <Link
+                  href="/auth/sign-in"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
